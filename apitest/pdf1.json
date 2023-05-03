@@ -6,6 +6,6 @@
         "body": {{ file "payload.json" }}
     },
     "response": {
-        "statuscode": 201
+        "statuscode": 200
     }
 }

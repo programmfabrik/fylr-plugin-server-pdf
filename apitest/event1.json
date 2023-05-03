@@ -1,0 +1,30 @@
+{
+    "name": "GET event/list",
+    "request": {
+        "method": "GET",
+        "endpoint": "event/list",
+        "query_params": {
+            "type": "SERVER_PDF_GENERATE"
+        }
+    },
+    "response": {
+        "body": {
+            "count": 1,
+            "objects": [
+                {
+                    "_basetype": "event",
+                    "event": {
+                        "type": "SERVER_PDF_GENERATE",
+                        "info": {
+                        }
+                    },
+                    "user": {
+                        "_generated_displayname": "root"
+                    }
+                }
+            ]
+        }
+    },
+    "delay_ms": 500,
+    "timeout_ms": 15000
+}

@@ -15,4 +15,14 @@ extensions:
             type: "body"
           stdout:
             type: "body"
+          args:
+            - type: "value"
+              value: "-info"
+            - type: "value"
+              value: "%info.json%"
 
+custom_events:
+  SERVER_PDF_GENERATE:
+    user: true
+  SERVER_PDF_GENERATE_ERROR:
+    user: true

@@ -44,10 +44,10 @@ func (pw *proxyWriter) Write(data []byte) (n int, err error) {
 	return n, err
 }
 
-func startChrome(ctx context.Context, prog string) (port int, process *os.Process, err error) {
+func startChrome(ctx context.Context, prog string) (port int, process *os.Process, exit chan bool, err error) {
 	_, err = exec.LookPath(prog)
 	if err != nil {
-		return 0, nil, err
+		return 0, nil, nil, err
 	}
 	cmd := exec.CommandContext(ctx, prog,
 		"--headless",
@@ -67,7 +67,11 @@ func startChrome(ctx context.Context, prog string) (port int, process *os.Proces
 	}()
 	cmd.Stderr = pw
 	cmd.Stdout = os.Stdout
+	exit = make(chan bool, 1)
 	go func() {
+		defer func() {
+			exit <- true
+		}()
 		err := cmd.Start()
 		if err != nil {
 			log.Fatalf("%s start failed with error: %s", prog, err.Error())
@@ -85,5 +89,5 @@ func startChrome(ctx context.Context, prog string) (port int, process *os.Proces
 		log.Printf("%s exited", prog)
 	}()
 	wg.Wait()
-	return port, process, nil
+	return port, process, exit, nil
 }

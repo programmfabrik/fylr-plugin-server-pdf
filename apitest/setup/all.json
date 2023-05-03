@@ -1,4 +1,8 @@
 [
     "@get_settings.json"
     ,"@root_session.json"
+    ,"@purge.json"
+    // get settings again, after purge we have a new db instance id
+    ,"@get_settings.json"
+    ,"@root_session.json"
 ]

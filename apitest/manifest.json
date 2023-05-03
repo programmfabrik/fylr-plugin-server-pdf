@@ -3,9 +3,15 @@
     "header_from_store": {
         "Authorization": "root-token"
     },
+    "store": {
+        // don't init datamodel, plugins, but init config
+        "setup_datamodel": "-"
+    },
     "tests": [
         "@setup/all.json"
         // create hello world pdf
         ,"@pdf1.json"
+        // check that event is written
+        ,"@event1.json"
     ]
 }
