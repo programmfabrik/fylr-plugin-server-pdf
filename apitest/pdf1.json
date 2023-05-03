@@ -1,0 +1,11 @@
+{
+    "name": "Dump Info Hello",
+    "request": {
+        "method": "POST",
+        "endpoint": "plugin/base/server-pdf/html2pdf",
+        "body": {{ file "payload.json" }}
+    },
+    "response": {
+        "statuscode": 201
+    }
+}

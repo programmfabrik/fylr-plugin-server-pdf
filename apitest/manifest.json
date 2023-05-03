@@ -1,0 +1,11 @@
+{
+    "name": "fylr html2pdf",
+    "header_from_store": {
+        "Authorization": "root-token"
+    },
+    "tests": [
+        "@setup/all.json"
+        // create hello world pdf
+        ,"@pdf1.json"
+    ]
+}

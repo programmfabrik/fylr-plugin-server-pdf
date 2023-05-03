@@ -1,0 +1,18 @@
+plugin:
+  name: server-pdf
+  version: "1"
+  displayname:
+    de-DE: Server PDF Plugin
+    en-US: Server PDF Plugin
+
+extensions:
+  html2pdf:
+    exec:
+      service: "exec"
+      commands:
+        - prog: "%_exec.pluginDir%/html2pdf-%_exec.GOOS%.exe"
+          stdin:
+            type: "body"
+          stdout:
+            type: "body"
+
