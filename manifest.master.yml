@@ -10,7 +10,7 @@ extensions:
     exec:
       service: "exec"
       commands:
-        - prog: "%_exec.pluginDir%/html2pdf-%_exec.GOOS%.exe"
+        - prog: "%_exec.pluginDir%/html2pdf-%_exec.GOOS%-%_exec.GOARCH%.exe"
           stdin:
             type: "body"
           stdout:

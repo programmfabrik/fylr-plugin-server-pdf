@@ -1,5 +1,5 @@
 {
-    "name": "Dump Info Hello",
+    "name": "Create PDF",
     "request": {
         "method": "POST",
         "endpoint": "plugin/base/server-pdf/html2pdf",
