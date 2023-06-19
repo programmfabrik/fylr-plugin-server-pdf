@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 	"syscall"
 	"time"
 
@@ -34,7 +36,7 @@ func main() {
 	if infoS != nil && *infoS != "" {
 		err := json.Unmarshal([]byte(*infoS), &info)
 		if err != nil {
-			endWithError(err)
+			endWithError(fmt.Errorf("JSON parse error of -info parameter: %w", err))
 		}
 	}
 
@@ -70,14 +72,19 @@ func main() {
 
 	timeProduce := time.Now()
 
+	// Replace external url with internal api url, to not run into dns resolve problems
+	if info.ExternalURL != "" && info.ApiURL != "" && info.ExternalURL != info.ApiURL {
+		old := info.ExternalURL + "/api/v1/eas/download"
+		new := info.ApiURL + "/api/v1/eas/download"
+		body.Document = strings.ReplaceAll(body.Document, old, new)
+	}
+
 	_, err = f.Write([]byte(body.Document))
 	if err != nil {
 		endWithError(err)
 	}
 
 	log.Printf("opened file %s", f.Name())
-
-	log.Printf("display header footer %t", *body.Properties.DisplayHeaderFooter)
 
 	data, err := createPdf(ctx, "file://"+f.Name(), port, body.Properties)
 	if err != nil {
@@ -99,6 +106,9 @@ func main() {
 	}})
 	log.Printf("%d bytes written to stdout", n)
 	process.Signal(syscall.SIGTERM)
+
+	// process.Wait produces an error here with chrome
+
 	// wait for chrome to exit
 	<-exit
 
