@@ -2,8 +2,8 @@ plugin:
   name: server-pdf
   version: "1"
   displayname:
-    de-DE: Server PDF Plugin
-    en-US: Server PDF Plugin
+    de-DE: "PDF Server"
+    en-US: "PDF Server"
 
 extensions:
   html2pdf:
