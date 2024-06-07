@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/programmfabrik/golib"
@@ -81,10 +80,15 @@ func main() {
 
 	_, err = f.Write([]byte(body.Document))
 	if err != nil {
+		f.Close()
+		endWithError(err)
+	}
+	err = f.Close()
+	if err != nil {
 		endWithError(err)
 	}
 
-	log.Printf("opened file %s", f.Name())
+	log.Printf("wrote %d bytes into temp file %s", len(body.Document), f.Name())
 
 	data, err := createPdf(ctx, "file://"+f.Name(), port, body.Properties)
 	if err != nil {
@@ -105,7 +109,14 @@ func main() {
 		"pdf size":         golib.HumanByteSize(uint64(n)),
 	}})
 	log.Printf("%d bytes written to stdout", n)
-	process.Signal(syscall.SIGTERM)
+
+	log.Printf("killing pid %d (chrome)...", process.Pid)
+	err = process.Kill()
+	if err != nil {
+		log.Printf("kill error: %s", err.Error())
+	} else {
+		log.Printf("killed")
+	}
 
 	// process.Wait produces an error here with chrome
 

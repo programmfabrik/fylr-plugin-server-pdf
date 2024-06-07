@@ -81,11 +81,8 @@ func startChrome(ctx context.Context, prog string) (port int, process *os.Proces
 		log.Printf("started %s, waiting to finish...", prog)
 		err = cmd.Wait()
 		if err != nil {
-			if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 143 {
-				// this is a clean exit by SIGTERM
-			} else {
-				log.Fatalf("%s existing with error: %s", prog, err.Error())
-			}
+			log.Printf("%s exited with error: %s", prog, err.Error())
+			return
 		}
 		log.Printf("%s exited", prog)
 	}()
