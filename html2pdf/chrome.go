@@ -32,7 +32,7 @@ func (pw *proxyWriter) Write(data []byte) (n int, err error) {
 	if err == nil && pw.portCh != nil {
 		pw.data = append(pw.data, data...)
 		s := string(pw.data)
-		re := regexp.MustCompile(`DevTools listening on ws://0\.0\.0\.0:([0-9]+)`)
+		re := regexp.MustCompile(`DevTools listening on ws://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:([0-9]+)`)
 		matches := re.FindAllStringSubmatch(s, -1)
 		if len(matches) > 0 {
 			port, _ := strconv.Atoi(matches[0][1])
@@ -53,7 +53,6 @@ func startChrome(ctx context.Context, prog string) (port int, process *os.Proces
 		"--headless",
 		"--disable-gpu",
 		"--no-sandbox",
-		"--remote-debugging-address=0.0.0.0",
 		"--remote-debugging-port=0",
 	)
 	wg := sync.WaitGroup{}
