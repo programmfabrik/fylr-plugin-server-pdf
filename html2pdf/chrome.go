@@ -50,7 +50,7 @@ func startChrome(ctx context.Context, prog string) (port int, process *os.Proces
 		return 0, nil, nil, err
 	}
 	cmd := exec.CommandContext(ctx, prog,
-		"--headless",
+		"--headless=old",
 		"--disable-gpu",
 		"--no-sandbox",
 		"--remote-debugging-port=0",
