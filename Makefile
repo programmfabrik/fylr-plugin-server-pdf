@@ -17,7 +17,10 @@ build: ## build files in build folder
 clean: ## clean
 	rm -rf build
 
+test:
+	cat apitest/payload.json | SERVER_PDF_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" build/server-pdf/html2pdf-darwin-arm64.exe > test.pdf
+
 zip: build ## build zip file
 	cd build && zip ${ZIP_NAME} -r server-pdf/
 
-.PHONY: build
+.PHONY: build test

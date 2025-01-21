@@ -2,7 +2,7 @@
     "name": "Create PDF",
     "request": {
         "method": "POST",
-        "endpoint": "plugin/base/server-pdf/html2pdf",
+        "endpoint": "plugin/extension/server-pdf/html2pdf",
         "body": {{ file "payload.json" }}
     },
     "response": {

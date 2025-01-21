@@ -1,6 +1,6 @@
 {
     "file_name": "print.pdf",
-    "document": "<html><body><h1>PDF server test</h1></body></html>",
+    "document": "<html><body><h1>PDF server test 2</h1><img width=\"100\" src=\"http://localhost/api/page/static/images/fylr-logo-black.png\"/></body></html>",
     "properties": {
         "displayHeaderFooter": true,
         "printBackground": true,

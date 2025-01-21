@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -49,8 +50,30 @@ func startChrome(ctx context.Context, prog string) (port int, process *os.Proces
 	if err != nil {
 		return 0, nil, nil, err
 	}
+
+	// Beginning with version 132, old Headless mode has been removed from the
+	// Chrome binary. Please use the new Headless mode
+	// (https://developer.chrome.com/docs/chromium/new-headless) or the
+	// chrome-headless-shell which is a standalone implementation of the old
+	// Headless mode (https://developer.chrome.com/blog/chrome-headless-shell).
+	out, err := exec.CommandContext(ctx, prog, "--version").CombinedOutput()
+	if err != nil {
+		return 0, nil, nil, err
+	}
+
+	var version int
+	matches := regexp.MustCompile(`.*?(1[0-9]+)\.`).FindAllStringSubmatch(string(out), -1)
+	if len(matches) > 0 {
+		version, _ = strconv.Atoi(matches[0][1])
+	}
+
+	var headlessOld string
+	if version < 132 {
+		headlessOld = "=old"
+	}
+
 	cmd := exec.CommandContext(ctx, prog,
-		"--headless=old",
+		"--headless"+headlessOld,
 		"--disable-gpu",
 		"--no-sandbox",
 		"--remote-debugging-port=0",
@@ -67,6 +90,7 @@ func startChrome(ctx context.Context, prog string) (port int, process *os.Proces
 	}()
 	cmd.Stderr = pw
 	cmd.Stdout = os.Stdout
+	fmt.Fprintf(os.Stderr, "exec: %s\n", cmd)
 	exit = make(chan bool, 1)
 	go func() {
 		defer func() {

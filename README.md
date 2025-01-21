@@ -5,24 +5,15 @@ Plugin to provide HTML to PDF functionality for fylr.
 * Check that you exec server is prepared to run plugin binaries, like so:
 
 ```yaml
-    execserver:
+    execserver+:
       ...
-      waitgroups:
-        a:
-          processes: 2
-      services:
-        # this service allows to execute arbitrary binaries
-        exec:
-          # choose a waitgroup which can take heavy tasks. Chromium on
-          # Linux needs about 500 MB to operate. Each parallel produce PDF
-          # will take that memory.
-          waitgroup: c
-          commands:
-            exec:
-              env:
-                # defaults to "chromium"
-                - SERVER_PDF_CHROME=chromium # change to Chrome or absolute paths
-
+      env+:
+        # The environment variable has to point to the Chrome binary. Without configuration "chromium"
+        # is expected in the PATH.
+        # Chrome / chromium is started using the parameters:
+        #  --headless --disable-gpu --no-sandbox --remote-debugging-port=0
+        # These parameters are hardcoded and cannot be changed at this point.
+        - SERVER_PDF_CHROME=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 ```
 
 * By default the server-pdf plugin expect the binary `chromium` in the exec server. If you prefer to use "Chrome" or want to provide an absolute path to the binary, use environment.
