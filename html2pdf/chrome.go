@@ -77,6 +77,7 @@ func startChrome(ctx context.Context, prog string) (port int, process *os.Proces
 		"--disable-gpu",
 		"--no-sandbox",
 		"--remote-debugging-port=0",
+		"--disable-dev-shm-usage",
 	)
 	wg := sync.WaitGroup{}
 	pw := newProxyWriter(os.Stderr)
