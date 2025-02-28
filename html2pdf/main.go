@@ -28,7 +28,7 @@ func main() {
 	prog := golib.GetEnv("")["SERVER_PDF_CHROME"]
 	if prog == "" {
 		if runtime.GOOS == "windows" {
-			prog = `C:\Program Files (x86)\Google\Chrome\Application\chrome.exe`
+			prog = `C:\Program Files\Google\Chrome\Application\chrome.exe`
 		} else {
 			prog = "chromium"
 		}
