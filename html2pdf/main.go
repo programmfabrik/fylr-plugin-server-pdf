@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -26,7 +27,11 @@ var info infoT
 func main() {
 	prog := golib.GetEnv("")["SERVER_PDF_CHROME"]
 	if prog == "" {
-		prog = "chromium"
+		if runtime.GOOS == "windows" {
+			prog = `C:\Program Files (x86)\Google\Chrome\Application\chrome.exe`
+		} else {
+			prog = "chromium"
+		}
 	}
 
 	infoS := flag.String("info", "", "JSON with callback info sent by fylr")

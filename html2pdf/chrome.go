@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strconv"
 	"sync"
 )
@@ -51,25 +52,29 @@ func startChrome(ctx context.Context, prog string) (port int, process *os.Proces
 		return 0, nil, nil, err
 	}
 
-	// Beginning with version 132, old Headless mode has been removed from the
-	// Chrome binary. Please use the new Headless mode
-	// (https://developer.chrome.com/docs/chromium/new-headless) or the
-	// chrome-headless-shell which is a standalone implementation of the old
-	// Headless mode (https://developer.chrome.com/blog/chrome-headless-shell).
-	out, err := exec.CommandContext(ctx, prog, "--version").CombinedOutput()
-	if err != nil {
-		return 0, nil, nil, err
-	}
-
-	var version int
-	matches := regexp.MustCompile(`.*?(1[0-9]+)\.`).FindAllStringSubmatch(string(out), -1)
-	if len(matches) > 0 {
-		version, _ = strconv.Atoi(matches[0][1])
-	}
-
 	var headlessOld string
-	if version < 132 {
-		headlessOld = "=old"
+
+	// On Windows we cannot run version, so we assume Chrome version >= 132
+	if runtime.GOOS != "windows" {
+		// Beginning with version 132, old Headless mode has been removed from the
+		// Chrome binary. Please use the new Headless mode
+		// (https://developer.chrome.com/docs/chromium/new-headless) or the
+		// chrome-headless-shell which is a standalone implementation of the old
+		// Headless mode (https://developer.chrome.com/blog/chrome-headless-shell).
+		out, err := exec.CommandContext(ctx, prog, "--version").CombinedOutput()
+		if err != nil {
+			return 0, nil, nil, err
+		}
+
+		var version int
+		matches := regexp.MustCompile(`.*?(1[0-9]+)\.`).FindAllStringSubmatch(string(out), -1)
+		if len(matches) > 0 {
+			version, _ = strconv.Atoi(matches[0][1])
+		}
+
+		if version < 132 {
+			headlessOld = "=old"
+		}
 	}
 
 	cmd := exec.CommandContext(ctx, prog,
