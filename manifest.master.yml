@@ -4,6 +4,26 @@ plugin:
   displayname:
     de-DE: "PDF Server"
     en-US: "PDF Server"
+  webfrontend:
+    url: pdf-creator.js
+    css: pdf-creator.css
+    print_css: pdf-creator-print.css
+  l10n: l10n/pdf-creator.csv
+
+base_url_prefix: "webfrontend"
+
+base_config:
+  - name: pdf_creator
+    group: css
+    parameters:
+      fylr_url:
+        regex: "^https?://[^/]+?/(fylr/|)pdf$"
+        type: text
+        position: 0
+      custom_css_url:
+        regex: "^https?://[^/]+?([a-z0-9]|/.*)$"
+        type: text
+        position: 1
 
 extensions:
   html2pdf:

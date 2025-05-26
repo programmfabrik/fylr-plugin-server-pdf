@@ -1,0 +1,3 @@
+[submodule "easydb-pdf-creator-plugin"]
+	path = easydb-pdf-creator-plugin
+	url = git@github.com:programmfabrik/easydb-pdf-creator-plugin.git

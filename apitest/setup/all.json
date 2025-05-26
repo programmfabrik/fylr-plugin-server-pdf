@@ -5,4 +5,9 @@
     // get settings again, after purge we have a new db instance id
     ,"@get_settings.json"
     ,"@root_session.json"
+    // upload and enable the plugin as a zip plugin
+    ,"@plugin_put_zip.json"
+    ,"@plugin_wait_for_zip_done.json"
+    ,"@plugin_init.json"
+    ,"@plugin_enable.json"
 ]
