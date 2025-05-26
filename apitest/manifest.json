@@ -1,3 +1,12 @@
+//////////////////////////////////////////////////////
+//                                                  //
+//  This apitest only works if plugin zip exists at //
+//  ../../build/server-pdf.zip                      //
+//                                                  //
+//  Run `make zip` before running apitest           //
+//                                                  //
+//////////////////////////////////////////////////////
+
 {
     "name": "fylr html2pdf",
     "header_from_store": {

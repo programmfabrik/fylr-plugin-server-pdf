@@ -19,4 +19,4 @@ Plugin to provide HTML to PDF functionality for fylr.
 * By default the server-pdf plugin expect the binary `chromium` in the exec server. If you prefer to use "Chrome" or want to provide an absolute path to the binary, use environment.
 
 * Install this Plugin into fylr (URL, ZIP or disk mode)
-* The [easydb-pdf-creator-plugin](https://github.com/programmfabrik/easydb-pdf-creator-plugin) will auto recognize this plugin and call the fylr server pdf creator automatically.
+* The [easydb-pdf-creator-plugin](https://github.com/programmfabrik/easydb-pdf-creator-plugin) is included as a submodule and provides the frontend functionality.
