@@ -95,7 +95,10 @@ func main() {
 
 	log.Printf("wrote %d bytes into temp file %s", len(body.Document), f.Name())
 
-	data, err := createPdf(ctx, "file://"+f.Name(), port, body.Properties)
+	// Stream the rendered PDF straight to stdout (see createPdf): the
+	// document never has to be buffered whole, so large exports no longer
+	// overflow chromium's DevTools buffer or this process's memory.
+	n, err := createPdf(ctx, "file://"+f.Name(), port, body.Properties, os.Stdout)
 	if err != nil {
 		endWithError(err)
 		return
@@ -103,11 +106,6 @@ func main() {
 
 	tookProduce := time.Since(timeProduce)
 
-	n, err := os.Stdout.Write(data)
-	if err != nil {
-		endWithError(err)
-		return
-	}
 	sendEvent(event{Type: "SERVER_PDF_GENERATE", Info: map[string]any{
 		"time startup":     tookStartup.String(),
 		"time pdf produce": tookProduce.String(),

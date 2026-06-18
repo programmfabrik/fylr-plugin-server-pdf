@@ -3,10 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/url"
 	"strconv"
-
-	"github.com/pkg/errors"
 
 	"github.com/mafredri/cdp"
 	"github.com/mafredri/cdp/devtool"
@@ -23,7 +22,7 @@ type pdfCreatorBody struct {
 	Properties page.PrintToPDFArgs `json:"properties"`
 }
 
-func createPdf(ectx context.Context, urlToRender string, port int, printToPDFArgs page.PrintToPDFArgs) ([]byte, error) {
+func createPdf(ectx context.Context, urlToRender string, port int, printToPDFArgs page.PrintToPDFArgs, w io.Writer) (int64, error) {
 	ctx, cancel := context.WithCancel(ectx)
 	defer func() {
 		// Ensure to all executions on context close
@@ -38,13 +37,13 @@ func createPdf(ectx context.Context, urlToRender string, port int, printToPDFArg
 	// Use the DevTools API to manage targets
 	pt, err := devtool.New(devtoolUrl.String()).Version(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "Tried to connect to headless chrome. Could not create new devtool connection")
+		return 0, fmt.Errorf("Tried to connect to headless chrome. Could not create new devtool connection: %w", err)
 	}
 
 	// Open a new RPC connection to the Chrome Debugging Protocol target
 	conn, err := rpcc.DialContext(ctx, pt.WebSocketDebuggerURL)
 	if err != nil {
-		return nil, errors.Wrap(err, "Tried to connect to headless chrome. Could not create DialContext")
+		return 0, fmt.Errorf("Tried to connect to headless chrome. Could not create DialContext: %w", err)
 	}
 	defer conn.Close()
 
@@ -52,7 +51,7 @@ func createPdf(ectx context.Context, urlToRender string, port int, printToPDFArg
 	baseBrowser := cdp.NewClient(conn)
 	err = baseBrowser.Security.SetIgnoreCertificateErrors(ctx, &security.SetIgnoreCertificateErrorsArgs{Ignore: true})
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not set ignore certificate error to true")
+		return 0, fmt.Errorf("Could not set ignore certificate error to true: %w", err)
 	}
 	newContextTarget, err := baseBrowser.Target.CreateBrowserContext(ctx, &target.CreateBrowserContextArgs{})
 	if err != nil {
@@ -64,7 +63,7 @@ func createPdf(ectx context.Context, urlToRender string, port int, printToPDFArg
 	newTargetArgs := target.NewCreateTargetArgs("about:blank").SetBrowserContextID(newContextTarget.BrowserContextID)
 	newTarget, err := baseBrowser.Target.CreateTarget(ctx, newTargetArgs)
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not open new blank target")
+		return 0, fmt.Errorf("Could not open new blank target: %w", err)
 	}
 	defer baseBrowser.Target.CloseTarget(context.Background(), &target.CloseTargetArgs{TargetID: newTarget.TargetID})
 
@@ -73,7 +72,7 @@ func createPdf(ectx context.Context, urlToRender string, port int, printToPDFArg
 	devtoolUrl.Path = fmt.Sprintf("/devtools/page/%s", newTarget.TargetID)
 	newContextConn, err := rpcc.DialContext(ctx, devtoolUrl.String(), rpcc.WithWriteBufferSize(104857586), rpcc.WithCompression())
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not create dial context to new target")
+		return 0, fmt.Errorf("Could not create dial context to new target: %w", err)
 	}
 	defer newContextConn.Close()
 	c := cdp.NewClient(newContextConn)
@@ -86,34 +85,34 @@ func createPdf(ectx context.Context, urlToRender string, port int, printToPDFArg
 	// Enable the runtime
 	err = c.Runtime.Enable(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not enable runtime")
+		return 0, fmt.Errorf("Could not enable runtime: %w", err)
 	}
 
 	// Enable the network
 	err = c.Network.Enable(ctx, network.NewEnableArgs())
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not enable network")
+		return 0, fmt.Errorf("Could not enable network: %w", err)
 	}
 
 	// Enable events on the Page domain
 	err = c.Page.Enable(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not enable events")
+		return 0, fmt.Errorf("Could not enable events: %w", err)
 	}
 
 	// CSP bypass
 	err = c.Page.SetBypassCSP(ctx, &page.SetBypassCSPArgs{Enabled: true})
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not set bypass CSP to enabled")
+		return 0, fmt.Errorf("Could not set bypass CSP to enabled: %w", err)
 	}
 
 	// Listen for lifecycle events, which include loading external resources (CSS, JS, etc)
 	if err := c.Page.SetLifecycleEventsEnabled(ctx, page.NewSetLifecycleEventsEnabledArgs(true)); err != nil {
-		return nil, errors.Wrap(err, "Could not enable lifecycle events")
+		return 0, fmt.Errorf("Could not enable lifecycle events: %w", err)
 	}
 	lifecycleEvent, err := c.Page.LifecycleEvent(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not create lifecycle events listener")
+		return 0, fmt.Errorf("Could not create lifecycle events listener: %w", err)
 	}
 	defer lifecycleEvent.Close()
 
@@ -129,14 +128,14 @@ func createPdf(ectx context.Context, urlToRender string, port int, printToPDFArg
 	navArgs := page.NewNavigateArgs(urlToRender)
 	_, err = c.Page.Navigate(ctx, navArgs)
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not navigate to page")
+		return 0, fmt.Errorf("Could not navigate to page: %w", err)
 	}
 
 	// Wait for lifecycle events to finish
 	for {
 		ev, err := lifecycleEvent.Recv()
 		if err != nil {
-			return nil, errors.Wrap(err, "Could not wait for finish lifecycle events")
+			return 0, fmt.Errorf("Could not wait for finish lifecycle events: %w", err)
 		}
 		if ev.Name == "networkIdle" {
 			break
@@ -149,9 +148,36 @@ func createPdf(ectx context.Context, urlToRender string, port int, printToPDFArg
 	// 	return nil, errors.Wrap(err, "Could not wait for finish loading event")
 	// }
 
+	// Request the PDF as a stream instead of inline. PrintToPDF otherwise
+	// returns the whole document in a single DevTools message, which
+	// overflows chromium's remote-debugging buffer (max_buffer_size, 256 MB)
+	// for large exports and fails the entire job (see ticket 79887). As a
+	// stream the PDF is read back in small chunks via IO.read and copied
+	// straight to w, so neither chromium's buffer nor this process ever holds
+	// the full document at once.
+	printToPDFArgs.SetTransferMode("ReturnAsStream")
+
 	printDa, err := c.Page.PrintToPDF(ctx, &printToPDFArgs)
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not print to pdf")
+		return 0, fmt.Errorf("Could not print to pdf: %w", err)
 	}
-	return printDa.Data, nil
+
+	if printDa.Stream == nil {
+		// No stream handle (e.g. an older chromium ignoring transferMode):
+		// fall back to the inline data.
+		n, err := w.Write(printDa.Data)
+		if err != nil {
+			return int64(n), fmt.Errorf("Could not write inline pdf data: %w", err)
+		}
+		return int64(n), nil
+	}
+
+	sr := c.NewIOStreamReader(ctx, *printDa.Stream)
+	defer sr.Close()
+
+	n, err := io.Copy(w, sr)
+	if err != nil {
+		return n, fmt.Errorf("Could not read pdf stream: %w", err)
+	}
+	return n, nil
 }
