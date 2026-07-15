@@ -5,6 +5,15 @@ plugin:
     de-DE: "PDF Server"
     en-US: "PDF Server"
 
+  info:
+    de-DE: |
+      Stellt die serverseitige HTML-zu-PDF-Erzeugung für fylr bereit. Zur Umwandlung von HTML in PDF-Dokumente wird eine Headless-Chrome/Chromium-Instanz auf dem Exec-Server ausgeführt.
+
+      Das Plugin PDF Creator erkennt dieses Plugin automatisch und ruft es zur PDF-Erzeugung auf.
+    en-US: |
+      Provides server-side HTML-to-PDF rendering for fylr. It runs a headless Chrome/Chromium instance on the exec server to convert HTML into PDF documents.
+
+      The PDF Creator plugin automatically detects this plugin and calls it to generate PDFs.
 extensions:
   html2pdf:
     exec:
