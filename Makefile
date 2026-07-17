@@ -1,26 +1,39 @@
-ZIP_NAME ?= "server-pdf.zip"
+# fylr plugins are built by fylr-build-plugin, the build driver that knows how
+# a fylr plugin is put together (compile, assemble build/, zip, seal, loca).
+# This Makefile is a thin shim for muscle memory — all logic lives in the
+# tool. @latest always resolves the tool's newest release, so plugins pick up
+# fixes without being touched; an incompatible tool change would come as a new
+# major version (import path .../v2), which is the only event that changes
+# this line.
+#
+# Tools needed:
+#   go       runs fylr-build-plugin + compiles html2pdf — https://go.dev/dl/
+FYLR_BUILD_PLUGIN ?= go run github.com/programmfabrik/fylr-build-plugin@latest
+
+# The tool itself reads NO environment variables — everything is passed as
+# flags. The release workflow's RELEASE_TAG / ZIP_NAME env is translated into
+# flags right here.
+RELEASE_FLAGS = $(if $(RELEASE_TAG),-release "$(RELEASE_TAG)")
+ZIP_FLAGS = $(RELEASE_FLAGS) $(if $(ZIP_NAME),-out "$(ZIP_NAME)")
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 all: build ## build all
 
-build: ## build files in build folder
-	cd html2pdf; CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../build/server-pdf/html2pdf-linux-amd64.exe
-	cd html2pdf; CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o ../build/server-pdf/html2pdf-linux-arm64.exe
-	cd html2pdf; CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o ../build/server-pdf/html2pdf-windows-amd64.exe
-	cd html2pdf; CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o ../build/server-pdf/html2pdf-windows-arm64.exe
-	cd html2pdf; CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o ../build/server-pdf/html2pdf-darwin-amd64.exe
-	cd html2pdf; CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o ../build/server-pdf/html2pdf-darwin-arm64.exe
-	cp -r manifest.master.yml build/server-pdf/manifest.yml
+build: ## build the plugin into build/<name>/ — loadable by fylr via plugin.paths
+	$(FYLR_BUILD_PLUGIN) build $(RELEASE_FLAGS)
 
-clean: ## clean
-	rm -rf build
+zip: ## build the release zip
+	$(FYLR_BUILD_PLUGIN) zip $(ZIP_FLAGS)
 
-test:
+check: ## validate the build tree against the manifest
+	$(FYLR_BUILD_PLUGIN) check
+
+clean: ## clean build files
+	$(FYLR_BUILD_PLUGIN) clean
+
+test: ## render apitest/payload.json to test.pdf with the local darwin binary
 	cat apitest/payload.json | SERVER_PDF_CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" build/server-pdf/html2pdf-darwin-arm64.exe > test.pdf
 
-zip: build ## build zip file
-	cd build && zip ${ZIP_NAME} -r server-pdf/
-
-.PHONY: build test
+.PHONY: help all build zip check clean test

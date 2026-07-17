@@ -1,0 +1,20 @@
+# Build configuration for fylr-build-plugin — the explicit build description.
+# "check" (runs with every build) warns when a manifest reference is missing
+# from the build folder.
+# All features: https://github.com/programmfabrik/fylr-build-plugin
+
+server:
+  # Go server extension, cross-compiled per arch into "exe" (%GOOS% and
+  # %GOARCH% are replaced, matching the manifest's %_exec.GOOS%/%_exec.GOARCH%
+  # reference); sources do not ship
+  go:
+    archs:
+      - { GOOS: linux, GOARCH: amd64 }
+      - { GOOS: linux, GOARCH: arm64 }
+      - { GOOS: darwin, GOARCH: amd64 }
+      - { GOOS: darwin, GOARCH: arm64 }
+      - { GOOS: windows, GOARCH: amd64 }
+      - { GOOS: windows, GOARCH: arm64 }
+    modules:
+      - dir: html2pdf
+        exe: html2pdf-%GOOS%-%GOARCH%.exe
