@@ -1,6 +1,13 @@
 # fylr-plugin-server-pdf
 
-Plugin to provide HTML to PDF functionality for fylr.
+Provides fylr with a general HTML-to-PDF service: it exposes an `html2pdf` extension endpoint
+(`plugin/extension/server-pdf/html2pdf`) that renders HTML posted to it into a PDF, using a
+headless Chrome/Chromium on the exec server.
+
+> **Not needed for PDF Creator.** The current
+> [PDF Creator](https://github.com/programmfabrik/fylr-plugin-pdf-creator) ships its own
+> renderer and does not use this plugin. Install server-pdf when you want the HTML-to-PDF
+> endpoint for your own integration; the easydb-era PDF Creator used to depend on it.
 
 * Check that you exec server is prepared to run plugin binaries, like so:
 
