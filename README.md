@@ -1,5 +1,16 @@
 # fylr-plugin-server-pdf
 
+> [!WARNING]
+> **Deprecated.** [PDF Creator](https://github.com/programmfabrik/fylr-plugin-pdf-creator)
+> renders PDFs itself since v1.1.0 and no longer uses this plugin, which was its only
+> consumer in the product. Nothing in fylr calls this plugin any more.
+>
+> It is **not** removed by the 6.35 disk-to-url migration — that only touches plugins fylr
+> shipped — so if you installed it for PDF Creator you can uninstall it. Keep it only if
+> something of your own posts to its `html2pdf` endpoint.
+>
+> No new features are planned. The renderer lives on inside PDF Creator.
+
 Provides fylr with a general HTML-to-PDF service: it exposes an `html2pdf` extension endpoint
 (`plugin/extension/server-pdf/html2pdf`) that renders HTML posted to it into a PDF, using a
 headless Chrome/Chromium on the exec server.
