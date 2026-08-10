@@ -1,6 +1,6 @@
 plugin:
   name: server-pdf
-  version: "1"
+  version: "1.5.1"
   displayname:
     de-DE: "PDF Server"
     en-US: "PDF Server"
@@ -9,11 +9,11 @@ plugin:
     de-DE: |
       Stellt die serverseitige HTML-zu-PDF-Erzeugung für fylr bereit. Zur Umwandlung von HTML in PDF-Dokumente wird eine Headless-Chrome/Chromium-Instanz auf dem Exec-Server ausgeführt.
 
-      Das Plugin PDF Creator erkennt dieses Plugin automatisch und ruft es zur PDF-Erzeugung auf.
+      VERALTET: Das Plugin PDF Creator bringt die PDF-Erzeugung seit Version 1.1.0 selbst mit und verwendet dieses Plugin nicht mehr. Wenn Sie es nur für den PDF Creator installiert haben, können Sie es deinstallieren. Behalten Sie es, wenn eine eigene Anwendung den html2pdf-Endpunkt aufruft.
     en-US: |
       Provides server-side HTML-to-PDF rendering for fylr. It runs a headless Chrome/Chromium instance on the exec server to convert HTML into PDF documents.
 
-      The PDF Creator plugin automatically detects this plugin and calls it to generate PDFs.
+      DEPRECATED: PDF Creator ships its own renderer since version 1.1.0 and no longer uses this plugin. If you installed it only for PDF Creator, you can uninstall it. Keep it if something of your own calls the html2pdf endpoint.
 extensions:
   html2pdf:
     exec:
